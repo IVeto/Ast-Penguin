@@ -9,7 +9,8 @@ window.onload = function() {
   game.preload('res/ast.png',
     'res/space_ship.png',
     'res/Ice.png',
-    'res/Astroid.png');
+    'res/Astroid.png',
+    'res/explosion.png');
   //Game settings
   game.fps = 60;
   game.scale = 1;
@@ -24,7 +25,8 @@ window.onload = function() {
   var SceneGame = Class.create(Scene, {
     // The main gameplay scene.
     initialize: function() {
-      var game, scoreLabel,livesLabel, bg, iceGroup, astroidGroup, space_ship;
+      var game, scoreLabel,livesLabel, bg, iceGroup, astroidGroup,explosionGroup,
+       space_ship;
       //Call superclass constructor
       Scene.apply(this);
       //Access to the game singleton instance
@@ -68,10 +70,15 @@ window.onload = function() {
       astroidGroup = new Group();
       this.astroidGroup = astroidGroup;
 
+      // explosion group
+      explosionGroup = new Group();
+      this.explosionGroup = explosionGroup;
+
       // Add child nodes
       this.addChild(bg);
       this.addChild(iceGroup);
       this.addChild(astroidGroup);
+      this.addChild(explosionGroup);
       this.addChild(scoreLabel);
       this.addChild(livesLabel);
       this.addChild(spaceShip);
@@ -128,6 +135,8 @@ window.onload = function() {
         var astroid;
         astroid = this.astroidGroup.childNodes[i];
         if (astroid.intersect(this.spaceShip)) {
+          explosion = new Explosion(astroid.x - 110,astroid.y - 110);
+          this.explosionGroup.addChild(explosion);
           this.astroidGroup.removeChild(astroid);
           // Game over
           if(this.lives>1){
@@ -260,6 +269,49 @@ var Astroid = Class.create(Sprite, {
     }
   }
 });
+// Explosion
+var Explosion = Class.create(Sprite, {
+  // The obstacle that the penguin must avoid
+  initialize: function(x,y) {
+    // Call superclass constructor
+    Sprite.apply(this, [256, 256]);
+    this.image = Game.instance.assets['res/explosion.png'];
+    this.rotationSpeed = 0;
+    this.animationDuration = 0;
+    this.frame = 0;
+    this.setPosition(x,y);
+    this.addEventListener(Event.ENTER_FRAME, this.update);
+  },
+  setPosition: function(x,y) {
+    this.rotationSpeed = Math.random() * 100 - 50;
+    this.x = x;
+    this.y = y;
+    this.rotation = Math.floor(Math.random() * 360);
+  },
+  update: function(evt) {
+    var ySpeed, game;
+
+    game = Game.instance;
+    ySpeed = 200;
+
+    this.y += ySpeed * evt.elapsed * 0.001;
+    this.rotation += this.rotationSpeed * evt.elapsed * 0.001;
+    if (this.y > game.height) {
+      this.parentNode.removeChild(this);
+    }
+
+    this.animationDuration += evt.elapsed * 0.001;
+    if (this.animationDuration >= 0.04) {
+      this.frame++;
+      if (this.frame > 16) {
+        this.parentNode.removeChild(this);
+      }
+      this.animationDuration -= 0.04;
+    }
+  }
+});
+
+
 // SceneGameOver
 var SceneGameOver = Class.create(Scene, {
   initialize: function(score) {
