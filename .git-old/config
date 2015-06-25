@@ -1,0 +1,14 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+	hideDotFiles = dotGitOnly
+[gui]
+	wmstate = normal
+	geometry = 911x426+479+405 183 192
+[remote "origin"]
+	url = git@github.com:IVeto/Ast-Penguin.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
